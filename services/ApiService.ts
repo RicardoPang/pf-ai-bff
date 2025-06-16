@@ -8,7 +8,7 @@ class ApiService implements IApi {
     // if(){}..
     return new Promise<IData>((resolve) => {
       resolve({
-        item: '我是后台数据🍌',
+        item: '我是后台数据🍌🍌🍌',
         result: [1, 'next'],
       });
     });
