@@ -1,0 +1,46 @@
+{
+  "name": "pf-ai-bff",
+  "version": "1.0.0",
+  "description": "BFF：MPA+SPA组合",
+  "main": "index.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only app.ts",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "pm2 start ecosystem.config.js --env production",
+    "stop": "pm2 stop pf-ai-bff",
+    "restart": "pm2 restart pf-ai-bff",
+    "reload": "pm2 reload pf-ai-bff",
+    "logs": "pm2 logs pf-ai-bff",
+    "status": "pm2 status",
+    "deploy": "npm run build && npm run start"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/co": "^4.6.6",
+    "@types/koa": "^2.15.0",
+    "@types/koa-router": "^7.4.8",
+    "@types/koa-static": "^4.0.4",
+    "@types/lodash": "^4.17.17",
+    "@types/module-alias": "^2.0.4",
+    "@types/node": "^24.0.1",
+    "awilix": "^12.0.5",
+    "awilix-koa": "^11.1.0",
+    "co": "^4.6.0",
+    "koa": "^3.0.0",
+    "koa-router": "^13.0.1",
+    "koa-static": "^5.0.0",
+    "koa-swig": "^2.2.1",
+    "koa2-connect-history-api-fallback": "^0.1.3",
+    "lodash": "^4.17.21",
+    "module-alias": "^2.2.3",
+    "typescript": "^5.8.3"
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/koa__router": "^12.0.4",
+    "ts-node-dev": "^2.0.0"
+  }
+}
