@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>博客文章详情</title>
+  <style>
+    /* 基础样式 */
+    body {
+      font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    header {
+      background-color: #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 15px 0;
+      margin-bottom: 30px;
+    }
+    
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    h1 {
+      color: #2c3e50;
+      margin: 0;
+    }
+    
+    .back-link {
+      color: #4dabf7;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+    
+    .back-link:hover {
+      text-decoration: underline;
+    }
+    
+    /* 文章详情样式 */
+    .article {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      padding: 30px;
+    }
+    
+    .article-header {
+      margin-bottom: 30px;
+    }
+    
+    .article-title {
+      font-size: 2rem;
+      margin-top: 0;
+      margin-bottom: 15px;
+      color: #2c3e50;
+    }
+    
+    .article-meta {
+      display: flex;
+      justify-content: space-between;
+      color: #868e96;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+    
+    .article-categories {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .category-tag {
+      background-color: #e9ecef;
+      color: #495057;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+    
+    .article-cover {
+      width: 100%;
+      max-height: 400px;
+      object-fit: cover;
+      border-radius: 4px;
+      margin-bottom: 30px;
+    }
+    
+    .article-content {
+      font-size: 1.1rem;
+      line-height: 1.8;
+    }
+    
+    .article-content p {
+      margin-bottom: 20px;
+    }
+    
+    .author-info {
+      display: flex;
+      align-items: center;
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #e9ecef;
+    }
+    
+    .author-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-right: 15px;
+    }
+    
+    .author-details h3 {
+      margin: 0 0 5px 0;
+      color: #2c3e50;
+    }
+    
+    .author-bio {
+      color: #6c757d;
+      font-size: 0.9rem;
+    }
+    
+    /* 加载状态 */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      font-size: 1.2rem;
+      color: #6c757d;
+    }
+    
+    /* 错误状态 */
+    .error {
+      text-align: center;
+      padding: 40px;
+      color: #e74c3c;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <h1>我的博客</h1>
+    </div>
+  </header>
+  
+  <div class="container">
+    <a href="/blog" class="back-link">← 返回文章列表</a>
+    
+    <div id="loading" class="loading">正在加载文章...</div>
+    <div id="error" class="error" style="display: none;"></div>
+    <div id="article" class="article" style="display: none;"></div>
+  </div>
+  
+  <script>
+    // 获取文章ID
+    const articleId = window.location.pathname.split('/').pop();
+    
+    // 页面加载完成后执行
+    document.addEventListener('DOMContentLoaded', () => {
+      // 加载文章详情
+      fetchArticle(articleId);
+    });
+    
+    /**
+     * 获取文章详情
+     * @param {string} id 文章ID
+     */
+    async function fetchArticle(id) {
+      // 显示加载状态
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('article').style.display = 'none';
+      document.getElementById('error').style.display = 'none';
+      
+      try {
+        // 发送请求获取文章详情
+        const response = await fetch(`/api/blog/articles/${id}`);
+        
+        if (!response.ok) {
+          throw new Error('获取文章详情失败');
+        }
+        
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(result.message || '获取文章详情失败');
+        }
+        
+        // 渲染文章详情
+        renderArticle(result.data);
+        
+        // 隐藏加载状态，显示文章详情
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('article').style.display = 'block';
+        
+        // 设置页面标题
+        document.title = `${result.data.title} - 我的博客`;
+      } catch (error) {
+        console.error('获取文章详情失败:', error);
+        
+        // 显示错误信息
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('error').style.display = 'block';
+        document.getElementById('error').textContent = `加载失败: ${error.message}`;
+      }
+    }
+    
+    /**
+     * 渲染文章详情
+     * @param {Object} article 文章对象
+     */
+    function renderArticle(article) {
+      const articleContainer = document.getElementById('article');
+      
+      // 格式化日期
+      const createdAt = new Date(article.createdAt).toLocaleDateString('zh-CN', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+      
+      // 默认封面图
+      const coverImage = article.coverImage || 'https://via.placeholder.com/900x400?text=博客文章';
+      
+      // 默认作者头像
+      const authorAvatar = article.author.avatar || 'https://via.placeholder.com/60x60?text=作者';
+      
+      // 渲染文章内容
+      // 注意：这里我们使用简单的段落分割，实际项目中可能需要使用Markdown渲染器
+      const contentHtml = article.content
+        .split('\n')
+        .filter(paragraph => paragraph.trim() !== '')
+        .map(paragraph => `<p>${paragraph}</p>`)
+        .join('');
+      
+      // 创建文章详情HTML
+      articleContainer.innerHTML = `
+        <div class="article-header">
+          <h1 class="article-title">${article.title}</h1>
+          <div class="article-meta">
+            <span>作者: ${article.author.name}</span>
+            <span>发布于: ${createdAt}</span>
+          </div>
+          ${renderCategories(article.categories)}
+        </div>
+        
+        ${article.coverImage ? `<img src="${coverImage}" alt="${article.title}" class="article-cover">` : ''}
+        
+        <div class="article-content">
+          ${contentHtml}
+        </div>
+        
+        <div class="author-info">
+          <img src="${authorAvatar}" alt="${article.author.name}" class="author-avatar">
+          <div class="author-details">
+            <h3>${article.author.name}</h3>
+            <p class="author-bio">${article.author.bio || '这个作者很懒，还没有填写个人简介。'}</p>
+          </div>
+        </div>
+      `;
+    }
+    
+    /**
+     * 渲染分类标签
+     * @param {Array} categories 分类列表
+     * @returns {string} 分类标签HTML
+     */
+    function renderCategories(categories) {
+      if (!categories || categories.length === 0) {
+        return '';
+      }
+      
+      const categoryTags = categories.map(category => 
+        `<span class="category-tag">${category.name}</span>`
+      ).join('');
+      
+      return `<div class="article-categories">${categoryTags}</div>`;
+    }
+  </script>
+</body>
+</html>

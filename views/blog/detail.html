@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{article.title}} - 我的博客</title>
+  <style>
+    /* 基础样式 */
+    body {
+      font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    header {
+      background-color: #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 15px 0;
+      margin-bottom: 30px;
+    }
+    
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    .back-link {
+      color: #4dabf7;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s ease;
+    }
+    
+    .back-link:hover {
+      color: #339af0;
+    }
+    
+    h1 {
+      color: #2c3e50;
+      margin: 0;
+      font-size: 1.5rem;
+    }
+    
+    /* 文章样式 */
+    .article {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    
+    .article-header {
+      padding: 30px;
+      border-bottom: 1px solid #e9ecef;
+    }
+    
+    .article-title {
+      font-size: 2rem;
+      font-weight: 600;
+      color: #2c3e50;
+      margin: 0 0 15px 0;
+      line-height: 1.3;
+    }
+    
+    .article-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      color: #6c757d;
+      font-size: 0.9rem;
+      margin-bottom: 15px;
+    }
+    
+    .article-meta span {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .article-categories {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .category-tag {
+      background-color: #e9ecef;
+      color: #495057;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    
+    .article-cover {
+      width: 100%;
+      height: 300px;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    
+    .article-content {
+      padding: 30px;
+    }
+    
+    .article-summary {
+      font-size: 1.1rem;
+      color: #6c757d;
+      font-style: italic;
+      margin-bottom: 25px;
+      padding: 15px;
+      background-color: #f8f9fa;
+      border-left: 4px solid #4dabf7;
+      border-radius: 4px;
+    }
+    
+    .article-body {
+      font-size: 1rem;
+      line-height: 1.8;
+    }
+    
+    .article-body h1,
+    .article-body h2,
+    .article-body h3,
+    .article-body h4,
+    .article-body h5,
+    .article-body h6 {
+      color: #2c3e50;
+      margin-top: 30px;
+      margin-bottom: 15px;
+    }
+    
+    .article-body h1 {
+      font-size: 1.8rem;
+      border-bottom: 2px solid #e9ecef;
+      padding-bottom: 10px;
+    }
+    
+    .article-body h2 {
+      font-size: 1.5rem;
+    }
+    
+    .article-body h3 {
+      font-size: 1.3rem;
+    }
+    
+    .article-body p {
+      margin-bottom: 15px;
+    }
+    
+    .article-body ul,
+    .article-body ol {
+      margin-bottom: 15px;
+      padding-left: 25px;
+    }
+    
+    .article-body li {
+      margin-bottom: 5px;
+    }
+    
+    .article-body pre {
+      background-color: #f8f9fa;
+      border: 1px solid #e9ecef;
+      border-radius: 4px;
+      padding: 15px;
+      overflow-x: auto;
+      margin-bottom: 15px;
+    }
+    
+    .article-body code {
+      background-color: #f8f9fa;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-size: 0.9rem;
+    }
+    
+    .article-body pre code {
+      background-color: transparent;
+      padding: 0;
+    }
+    
+    .article-body blockquote {
+      border-left: 4px solid #4dabf7;
+      background-color: #f8f9fa;
+      margin: 20px 0;
+      padding: 15px 20px;
+      font-style: italic;
+    }
+    
+    /* 作者信息 */
+    .author-info {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .author-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      flex-shrink: 0;
+    }
+    
+    .author-details h3 {
+      margin: 0 0 5px 0;
+      color: #2c3e50;
+      font-size: 1.1rem;
+    }
+    
+    .author-details p {
+      margin: 0;
+      color: #6c757d;
+      font-size: 0.9rem;
+    }
+    
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .container {
+        padding: 10px;
+      }
+      
+      .article-header,
+      .article-content {
+        padding: 20px;
+      }
+      
+      .article-title {
+        font-size: 1.5rem;
+      }
+      
+      .article-meta {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .author-info {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="/blog/" class="back-link">← 返回博客列表</a>
+      <h1>文章详情</h1>
+    </div>
+  </header>
+  
+  <div class="container">
+    <article class="article">
+      <div class="article-header">
+        <h1 class="article-title">{{article.title}}</h1>
+        <div class="article-meta">
+          <span>📝 作者: {{article.author.name}}</span>
+          <span>📅 发布时间: {{article.createdAt | date('Y-m-d')}}</span>
+          {% if article.updatedAt != article.createdAt %}
+          <span>🔄 更新时间: {{article.updatedAt | date('Y-m-d')}}</span>
+          {% endif %}
+        </div>
+        {% if article.categories.length > 0 %}
+        <div class="article-categories">
+          {% for category in article.categories %}
+          <span class="category-tag">{{category.name}}</span>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      
+      {% if article.coverImage %}
+      <div class="article-cover" style="background-image: url('{{article.coverImage}}')"></div>
+      {% endif %}
+      
+      <div class="article-content">
+        {% if article.summary %}
+        <div class="article-summary">
+          {{article.summary}}
+        </div>
+        {% endif %}
+        
+        <div class="article-body">
+          {{article.content | safe}}
+        </div>
+      </div>
+    </article>
+    
+    <div class="author-info">
+      <div class="author-avatar" style="background-image: url('{{article.author.avatar}}')"></div>
+      <div class="author-details">
+        <h3>{{article.author.name}}</h3>
+        <p>{{article.author.bio || '这个作者很神秘，什么都没有留下...'}}</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

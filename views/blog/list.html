@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>博客文章列表</title>
+  <style>
+    /* 基础样式 */
+    body {
+      font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    header {
+      background-color: #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      padding: 15px 0;
+      margin-bottom: 30px;
+    }
+    
+    .header-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    h1 {
+      color: #2c3e50;
+      margin: 0;
+    }
+    
+    /* 文章列表样式 */
+    .article-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 25px;
+    }
+    
+    .article-card {
+      background-color: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .article-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .article-image {
+      height: 200px;
+      background-color: #e9ecef;
+      background-size: cover;
+      background-position: center;
+    }
+    
+    .article-content {
+      padding: 20px;
+    }
+    
+    .article-title {
+      font-size: 1.25rem;
+      margin-top: 0;
+      margin-bottom: 10px;
+      color: #2c3e50;
+    }
+    
+    .article-summary {
+      color: #6c757d;
+      margin-bottom: 15px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    
+    .article-meta {
+      display: flex;
+      justify-content: space-between;
+      color: #868e96;
+      font-size: 0.875rem;
+    }
+    
+    .article-categories {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 10px;
+    }
+    
+    .category-tag {
+      background-color: #e9ecef;
+      color: #495057;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+    }
+    
+    /* 分页样式 */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      margin-top: 40px;
+      gap: 10px;
+    }
+    
+    .pagination-button {
+      background-color: #fff;
+      border: 1px solid #dee2e6;
+      color: #495057;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    
+    .pagination-button:hover {
+      background-color: #e9ecef;
+    }
+    
+    .pagination-button.active {
+      background-color: #4dabf7;
+      color: #fff;
+      border-color: #4dabf7;
+    }
+    
+    .pagination-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    /* 加载状态 */
+    .loading {
+      text-align: center;
+      padding: 40px;
+      font-size: 1.2rem;
+      color: #6c757d;
+    }
+    
+    /* 错误状态 */
+    .error {
+      text-align: center;
+      padding: 40px;
+      color: #e74c3c;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <h1>我的博客</h1>
+    </div>
+  </header>
+  
+  <div class="container">
+    <div id="loading" class="loading">正在加载文章...</div>
+    <div id="error" class="error" style="display: none;"></div>
+    
+    <div id="articles" class="article-list" style="display: none;"></div>
+    
+    <div id="pagination" class="pagination" style="display: none;">
+      <button id="prev-page" class="pagination-button">&laquo; 上一页</button>
+      <div id="page-numbers"></div>
+      <button id="next-page" class="pagination-button">下一页 &raquo;</button>
+    </div>
+  </div>
+  
+  <script>
+    // 当前页码
+    let currentPage = 1;
+    // 每页显示数量
+    const pageSize = 6;
+    // 总页数
+    let totalPages = 0;
+    
+    // 页面加载完成后执行
+    document.addEventListener('DOMContentLoaded', () => {
+      // 加载文章列表
+      fetchArticles(currentPage);
+      
+      // 绑定分页按钮事件
+      document.getElementById('prev-page').addEventListener('click', () => {
+        if (currentPage > 1) {
+          currentPage--;
+          fetchArticles(currentPage);
+        }
+      });
+      
+      document.getElementById('next-page').addEventListener('click', () => {
+        if (currentPage < totalPages) {
+          currentPage++;
+          fetchArticles(currentPage);
+        }
+      });
+    });
+    
+    /**
+     * 获取文章列表
+     * @param {number} page 页码
+     */
+    async function fetchArticles(page) {
+      // 显示加载状态
+      document.getElementById('loading').style.display = 'block';
+      document.getElementById('articles').style.display = 'none';
+      document.getElementById('pagination').style.display = 'none';
+      document.getElementById('error').style.display = 'none';
+      
+      try {
+        // 发送请求获取文章列表
+        const response = await fetch(`/api/blog/articles?page=${page}&pageSize=${pageSize}`);
+        
+        if (!response.ok) {
+          throw new Error('获取文章列表失败');
+        }
+        
+        const result = await response.json();
+        
+        if (!result.success) {
+          throw new Error(result.message || '获取文章列表失败');
+        }
+        
+        // 更新总页数
+        totalPages = result.data.totalPages;
+        
+        // 渲染文章列表
+        renderArticles(result.data.articles);
+        
+        // 渲染分页
+        renderPagination(result.data.page, result.data.totalPages);
+        
+        // 隐藏加载状态，显示文章列表和分页
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('articles').style.display = 'grid';
+        document.getElementById('pagination').style.display = 'flex';
+      } catch (error) {
+        console.error('获取文章列表失败:', error);
+        
+        // 显示错误信息
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('error').style.display = 'block';
+        document.getElementById('error').textContent = `加载失败: ${error.message}`;
+      }
+    }
+    
+    /**
+     * 渲染文章列表
+     * @param {Array} articles 文章列表
+     */
+    function renderArticles(articles) {
+      const articlesContainer = document.getElementById('articles');
+      
+      // 清空现有内容
+      articlesContainer.innerHTML = '';
+      
+      if (articles.length === 0) {
+        articlesContainer.innerHTML = '<div class="error">暂无文章</div>';
+        return;
+      }
+      
+      // 遍历文章列表，生成文章卡片
+      articles.forEach(article => {
+        // 格式化日期
+        const createdAt = new Date(article.createdAt).toLocaleDateString('zh-CN', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+        
+        // 默认封面图
+        const coverImage = article.coverImage || 'https://via.placeholder.com/300x200?text=博客文章';
+        
+        // 创建文章卡片
+        const articleCard = document.createElement('div');
+        articleCard.className = 'article-card';
+        articleCard.innerHTML = `
+          <div class="article-image" style="background-image: url('${coverImage}')"></div>
+          <div class="article-content">
+            <h2 class="article-title">${article.title}</h2>
+            <p class="article-summary">${article.summary || article.content.substring(0, 100)}...</p>
+            <div class="article-meta">
+              <span>作者: ${article.author.name}</span>
+              <span>${createdAt}</span>
+            </div>
+            ${renderCategories(article.categories)}
+          </div>
+        `;
+        
+        // 点击文章卡片跳转到文章详情页
+        articleCard.addEventListener('click', () => {
+          window.location.href = `/blog/articles/${article.id}`;
+        });
+        
+        // 添加到容器
+        articlesContainer.appendChild(articleCard);
+      });
+    }
+    
+    /**
+     * 渲染分类标签
+     * @param {Array} categories 分类列表
+     * @returns {string} 分类标签HTML
+     */
+    function renderCategories(categories) {
+      if (!categories || categories.length === 0) {
+        return '';
+      }
+      
+      const categoryTags = categories.map(category => 
+        `<span class="category-tag">${category.name}</span>`
+      ).join('');
+      
+      return `<div class="article-categories">${categoryTags}</div>`;
+    }
+    
+    /**
+     * 渲染分页
+     * @param {number} currentPage 当前页码
+     * @param {number} totalPages 总页数
+     */
+    function renderPagination(currentPage, totalPages) {
+      const pageNumbers = document.getElementById('page-numbers');
+      const prevButton = document.getElementById('prev-page');
+      const nextButton = document.getElementById('next-page');
+      
+      // 清空页码
+      pageNumbers.innerHTML = '';
+      
+      // 禁用/启用上一页按钮
+      prevButton.disabled = currentPage <= 1;
+      
+      // 禁用/启用下一页按钮
+      nextButton.disabled = currentPage >= totalPages;
+      
+      // 生成页码按钮
+      // 如果总页数小于等于5，显示所有页码
+      // 否则显示当前页码附近的页码
+      const startPage = totalPages <= 5 ? 1 : Math.max(1, currentPage - 2);
+      const endPage = totalPages <= 5 ? totalPages : Math.min(totalPages, startPage + 4);
+      
+      for (let i = startPage; i <= endPage; i++) {
+        const pageButton = document.createElement('button');
+        pageButton.className = `pagination-button ${i === currentPage ? 'active' : ''}`;
+        pageButton.textContent = i;
+        
+        pageButton.addEventListener('click', () => {
+          currentPage = i;
+          fetchArticles(currentPage);
+        });
+        
+        pageNumbers.appendChild(pageButton);
+      }
+    }
+  </script>
+</body>
+</html>
