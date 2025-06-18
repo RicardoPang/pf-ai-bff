@@ -1,0 +1,55 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://pangjianfeng@localhost:5432/blog"
+}
+
+// 博客文章模型
+model Article {
+  id          Int       @id @default(autoincrement())
+  title       String
+  content     String    @db.Text
+  summary     String?
+  coverImage  String?
+  published   Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  authorId    Int
+  author      Author    @relation(fields: [authorId], references: [id])
+  categories  CategoryOnArticle[]
+}
+
+// 作者模型
+model Author {
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique
+  bio       String?
+  avatar    String?
+  articles  Article[]
+}
+
+// 分类模型
+model Category {
+  id          Int                @id @default(autoincrement())
+  name        String             @unique
+  description String?
+  articles    CategoryOnArticle[]
+}
+
+// 文章与分类的关联表
+model CategoryOnArticle {
+  articleId  Int
+  categoryId Int
+  article    Article  @relation(fields: [articleId], references: [id])
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  @@id([articleId, categoryId])
+}

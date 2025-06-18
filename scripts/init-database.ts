@@ -41,7 +41,7 @@ async function initDatabase() {
       where: { email: 'admin@blog.com' },
       update: {},
       create: {
-        name: '博客管理员',
+        name: '黑白灰',
         email: 'admin@blog.com',
         bio: '这是一个测试博客的管理员账户',
         avatar: 'https://via.placeholder.com/150'

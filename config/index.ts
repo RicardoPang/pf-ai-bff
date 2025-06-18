@@ -9,6 +9,8 @@ const projectRoot = isProd ? join(__dirname, '../..') : join(__dirname, '..');
 let config = {
   viewDir: join(projectRoot, 'views'),
   staticDir: join(projectRoot, 'assets'),
+  // 添加前端打包文件目录配置
+  dappDir: join(projectRoot, 'public/dapp'),
   port: 8081,
   memoryFlag: false,
 };

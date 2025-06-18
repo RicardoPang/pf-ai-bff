@@ -16,10 +16,12 @@ import { loadControllers, scopePerRequest } from 'awilix-koa';
 import { historyApiFallback } from 'koa2-connect-history-api-fallback';
 
 const app = new Koa();
-const { port, viewDir, memoryFlag, staticDir } = config;
+const { port, viewDir, memoryFlag, staticDir, dappDir } = config;
 
 //静态资源生效节点
 app.use(serve(staticDir));
+// 前端打包文件静态服务
+app.use(serve(dappDir));
 const container = createContainer();
 
 //所有的可以被注入的代码都在container中

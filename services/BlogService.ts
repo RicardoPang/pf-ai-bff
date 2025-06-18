@@ -1,4 +1,3 @@
-import { Article, Author, Category } from '@prisma/client';
 import { prismaService } from './PrismaService';
 
 /**
