@@ -24,7 +24,7 @@ router.get('/', async (ctx) => {
   };
 });
 
-// 通用列表接口 - 兼容旧的 /api/list 请求
+// 通用列表接口
 router.get('/list', async (ctx) => {
   try {
     // 获取文章列表

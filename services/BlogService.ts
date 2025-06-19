@@ -18,10 +18,10 @@ export class BlogService {
   async getArticles(page = 1, pageSize = 10) {
     const skip = (page - 1) * pageSize;
     
-    // 使用 reader 客户端进行查询操作
-    const reader = prismaService.getReader();
-    
     try {
+      // 使用 reader 客户端进行查询操作
+      const reader = await prismaService.getReader();
+      
       // 获取文章总数
       const total = await reader.article.count();
       
@@ -67,10 +67,10 @@ export class BlogService {
    * @returns 文章详情，包含作者和分类信息
    */
   async getArticleById(id: number) {
-    // 使用 reader 客户端进行查询操作
-    const reader = prismaService.getReader();
-    
     try {
+      // 使用 reader 客户端进行查询操作
+      const reader = await prismaService.getReader();
+      
       const article = await reader.article.findUnique({
         where: { id },
         include: {
@@ -112,10 +112,10 @@ export class BlogService {
     authorId: number;
     categoryIds?: number[];
   }) {
-    // 使用 writer 客户端进行写入操作
-    const writer = prismaService.getWriter();
-    
     try {
+      // 使用 writer 客户端进行写入操作
+      const writer = await prismaService.getWriter();
+      
       const { categoryIds, ...articleData } = data;
       
       // 创建文章
@@ -171,10 +171,10 @@ export class BlogService {
       categoryIds?: number[];
     }
   ) {
-    // 使用 writer 客户端进行写入操作
-    const writer = prismaService.getWriter();
-    
     try {
+      // 使用 writer 客户端进行写入操作
+      const writer = await prismaService.getWriter();
+      
       const { categoryIds, ...articleData } = data;
       
       // 如果提供了分类ID，则先删除现有关联，再创建新关联
@@ -228,10 +228,10 @@ export class BlogService {
    * @returns 删除的文章
    */
   async deleteArticle(id: number) {
-    // 使用 writer 客户端进行写入操作
-    const writer = prismaService.getWriter();
-    
     try {
+      // 使用 writer 客户端进行写入操作
+      const writer = await prismaService.getWriter();
+      
       // 先删除文章与分类的关联
       await writer.categoryOnArticle.deleteMany({
         where: { articleId: id }
@@ -254,10 +254,10 @@ export class BlogService {
    * @returns 分类列表
    */
   async getCategories() {
-    // 使用 reader 客户端进行查询操作
-    const reader = prismaService.getReader();
-    
     try {
+      // 使用 reader 客户端进行查询操作
+      const reader = await prismaService.getReader();
+      
       return await reader.category.findMany();
     } catch (error) {
       console.error('获取分类列表失败:', error);
@@ -270,10 +270,10 @@ export class BlogService {
    * @returns 作者列表
    */
   async getAuthors() {
-    // 使用 reader 客户端进行查询操作
-    const reader = prismaService.getReader();
-    
     try {
+      // 使用 reader 客户端进行查询操作
+      const reader = await prismaService.getReader();
+      
       return await reader.author.findMany();
     } catch (error) {
       console.error('获取作者列表失败:', error);

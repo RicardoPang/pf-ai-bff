@@ -4,7 +4,8 @@ const nextConfig = {
     domains: [
       'randomuser.me',
       'www.postgresql.org',
-      'nextjs.org'
+      'nextjs.org',
+      'example.com'
     ],
   },
 };

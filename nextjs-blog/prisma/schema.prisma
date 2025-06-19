@@ -8,7 +8,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://pangjianfeng@localhost:5432/blog"
+  url      = env("DATABASE_URL")
 }
 
 // 博客文章模型

@@ -11,13 +11,13 @@ let config = {
   staticDir: join(projectRoot, 'assets'),
   // 添加前端打包文件目录配置
   dappDir: join(projectRoot, 'public/dapp'),
-  port: 8081,
+  port: 3003,
   memoryFlag: false,
 };
 
 if (process.env.NODE_ENV === 'development') {
   let localConfig = {
-    port: 8081,
+    port: 3003,
   };
   config = _.assignIn(config, localConfig);
 }

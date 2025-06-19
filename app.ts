@@ -12,6 +12,7 @@ import render from 'koa-swig';
 import config from '@config/index';
 import serve from 'koa-static';
 import { loadControllers, scopePerRequest } from 'awilix-koa';
+import { prismaService } from './services/PrismaService';
 //koa中没有实现的路由重定向到index.html
 import { historyApiFallback } from 'koa2-connect-history-api-fallback';
 
@@ -43,10 +44,61 @@ app.context.render = co.wrap(
     ext: 'html',
   })
 );
+
 app.use(historyApiFallback({ index: '/', whiteList: ['/api'] }));
+
 //让所有的路由全部生效
 app.use(loadControllers(`${__dirname}/routers/*.ts`));
 
-app.listen(port, () => {
-  console.log('Server BFF启动成功');
+const server = app.listen(port, () => {
+  console.log(`Server BFF启动成功，监听端口: ${port}`);
+});
+
+// 优雅关闭
+process.on('SIGINT', async () => {
+  console.log('接收到 SIGINT 信号，正在关闭服务...');
+  
+  // 先关闭 HTTP 服务器，停止接收新请求
+  server.close(() => {
+    console.log('HTTP 服务器已关闭');
+  });
+  
+  try {
+    // 断开数据库连接
+    await prismaService.disconnect();
+    console.log('数据库连接已断开');
+    
+    // 给应用一些时间完成剩余操作
+    setTimeout(() => {
+      console.log('应用正常关闭');
+      process.exit(0);
+    }, 1000);
+  } catch (error) {
+    console.error('关闭过程中发生错误:', error);
+    process.exit(1);
+  }
+});
+
+process.on('SIGTERM', async () => {
+  console.log('接收到 SIGTERM 信号，正在关闭服务...');
+  
+  // 先关闭 HTTP 服务器，停止接收新请求
+  server.close(() => {
+    console.log('HTTP 服务器已关闭');
+  });
+  
+  try {
+    // 断开数据库连接
+    await prismaService.disconnect();
+    console.log('数据库连接已断开');
+    
+    // 给应用一些时间完成剩余操作
+    setTimeout(() => {
+      console.log('应用正常关闭');
+      process.exit(0);
+    }, 1000);
+  } catch (error) {
+    console.error('关闭过程中发生错误:', error);
+    process.exit(1);
+  }
 });

@@ -16,8 +16,8 @@ async function main() {
     console.log('👤 创建作者...');
     const author = await prisma.author.create({
       data: {
-        name: '张三',
-        email: 'zhangsan@example.com',
+        name: '黑白灰',
+        email: 'ricardo.pangj@gmail.com',
         bio: '资深技术博主，专注于前端和后端开发',
         avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
       },
