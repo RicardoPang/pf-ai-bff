@@ -71,15 +71,5 @@ router.get('/list', async (ctx) => {
   }
 });
 
-// 健康检查接口
-router.get('/health', async (ctx) => {
-  ctx.body = {
-    success: true,
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime()
-  };
-});
-
 // 导出路由实例
 export default router;

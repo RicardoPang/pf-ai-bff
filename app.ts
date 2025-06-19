@@ -54,7 +54,7 @@ const server = app.listen(port, () => {
   console.log(`Server BFF启动成功，监听端口: ${port}`);
 });
 
-// 优雅关闭
+// 关闭
 process.on('SIGINT', async () => {
   console.log('接收到 SIGINT 信号，正在关闭服务...');
   

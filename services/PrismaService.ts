@@ -56,17 +56,6 @@ export class PrismaService {
       ],
     });
 
-    // 注释掉事件监听，避免类型错误
-    /*
-    this.writer.$on('query', (e: any) => {
-      console.log('Writer Query: ' + e.query);
-    });
-    
-    this.reader.$on('query', (e: any) => {
-      console.log('Reader Query: ' + e.query);
-    });
-    */
-
     // 连接数据库
     this.connectWithRetry();
   }
