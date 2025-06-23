@@ -1,98 +1,60 @@
-import { prismaReader } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import MarkdownRenderer from '@/components/MarkdownRenderer';
+import { articlesApi } from '@/lib/api';
+import { Article, Category } from '@/types';
 
 // 服务器端渲染
+// 强制动态渲染，避免缓存问题
 export const dynamic = 'force-dynamic';
 
-// 生成静态路径参数
+// 注意：如果使用API调用，可能需要调整生成静态路径的方式
+/* 
 export async function generateStaticParams() {
-  const articles = await prismaReader.article.findMany({
-    select: { id: true },
-    where: { published: true }
-  });
-  
-  return articles.map((article) => ({
-    id: article.id.toString(),
-  }));
+  try {
+    const response = await articlesApi.getArticles(1, 100); // 获取足够多的文章ID
+    const { data: articlesData } = response;
+    const articles = articlesData.items || [];
+    
+    return articles.map((article) => ({
+      id: article.id.toString(),
+    }));
+  } catch (error) {
+    console.error('生成静态路径失败:', error);
+    return [];
+  }
 }
+*/
 
-// 定义文章类型
-type Category = {
-  id: number;
-  name: string;
-};
+// 使用共享类型定义，已经在 @/types 中定义了
 
-type CategoryOnArticle = {
-  category: Category;
-};
-
-type Author = {
-  id: number;
-  name: string;
-  email: string;
-};
-
-type Article = {
-  id: number;
-  title: string;
-  content: string;
-  summary?: string | null;
-  coverImage?: string | null;
-  published: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-  authorId: number;
-  author: Author;
-  categories: CategoryOnArticle[];
-};
-
-export default async function BlogDetail({ params }: { params: { id: string } }) {
-  const id = parseInt(params.id);
+export default async function BlogDetail({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = await params;
+  const id = resolvedParams.id;
+  let article: Article;
+  let relatedArticles: Article[] = [];
   
-  // 先获取文章详情
-  const articleData = await prismaReader.article.findUnique({
-    where: { id },
-    include: {
-      author: true,
-      categories: {
-        include: {
-          category: true
-        }
-      }
+  try {
+    // 使用API获取文章详情
+    article = await articlesApi.getArticle(id);
+    
+    if (!article) {
+      notFound();
     }
-  });
-  
-  // 如果文章不存在，返回 404 页面
-  if (!articleData || !articleData.published) {
+    
+    // 如果文章未发布，返回404
+    if (!article.published) {
+      notFound();
+    }
+    
+    // 使用API获取相关文章（这里获取所有文章，然后过滤出最新的3篇作为相关文章）
+    const articlesResponse = await articlesApi.getArticles();
+    relatedArticles = (articlesResponse.items?.filter((a: Article) => a.id !== parseInt(id)) || []).slice(0, 3);
+  } catch (error) {
+    console.error('获取文章详情失败:', error);
     notFound();
   }
-  
-  // 将文章数据转换为类型安全的对象
-  const article = articleData as unknown as Article;
-  
-  // 获取相关文章（同一作者或同一分类的其他文章）
-  const relatedArticles = await prismaReader.article.findMany({
-    where: {
-      id: { not: id },
-      published: true,
-      OR: [
-        { authorId: article.authorId }, // 同一作者的文章
-      ]
-    },
-    include: {
-      author: true,
-      categories: {
-        include: {
-          category: true
-        }
-      }
-    },
-    orderBy: { createdAt: 'desc' },
-    take: 3
-  }).catch(() => []) as unknown as Article[];
   
   return (
     <div className="min-h-screen flex flex-col">
@@ -145,16 +107,16 @@ export default async function BlogDetail({ params }: { params: { id: string } })
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
               <div className="flex items-center">
                 <div>
-                  <div className="font-medium">{article.author.name}</div>
+                  <div className="font-medium">{article.author?.name || '未知作者'}</div>
                   <div className="text-sm text-gray-500">
                     发布于 {new Date(article.createdAt).toLocaleDateString('zh-CN')}
                   </div>
                 </div>
               </div>
               
-              {article.categories.length > 0 && (
+              {article.categories && article.categories.length > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {article.categories.map(({ category }) => (
+                  {article.categories && article.categories.map((category: Category) => (
                     <Link 
                       key={category.id}
                       href={`/blog?category=${encodeURIComponent(category.name)}`}
@@ -198,7 +160,7 @@ export default async function BlogDetail({ params }: { params: { id: string } })
                     </p>
                     
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">{relatedArticle.author.name}</span>
+                      <span className="text-gray-500">{relatedArticle.author?.name || '未知作者'}</span>
                       <span className="text-gray-500">
                         {new Date(relatedArticle.createdAt).toLocaleDateString('zh-CN')}
                       </span>
